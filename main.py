@@ -2,6 +2,7 @@ from PyQt5.Qt import QApplication, QMainWindow, QLabel, QTextEdit, QPushButton
 from PyQt5.Qt import QFont, QAction
 
 import sys
+import pprint
 
 
 class MainWindow(QMainWindow):
@@ -41,6 +42,7 @@ class MainWindow(QMainWindow):
         self.send.setText("Publish")
         self.send.setMinimumWidth(self.width-10)
         self.send.move(5, self.height-35)
+        self.send.clicked.connect(self.publish)
 
         # Create the menu bar
         menu = self.menuBar()
@@ -65,6 +67,36 @@ class MainWindow(QMainWindow):
         exit.setStatusTip("Exit from the app")
         exit.triggered.connect(sys.exit)
         actions.addAction(exit)
+
+    def publish(self):
+        # Get the text from the input
+        text = self.text.toPlainText()
+
+        # Create a list and fill it with the paragraphs
+        listPar = []
+
+        initChar = 0
+        i = 0
+
+        for char in text:
+            # Check if change of line, if true, add the paragraph to the list
+            if char == "\n":
+                listPar.append(text[initChar:i])
+
+                initChar = i + 1
+
+            i += 1
+
+            # Check if end of the text, if true, add the paragraph to the list
+            if i == len(text):
+                listPar.append(text[initChar:i])
+
+        # Remove from the list the paragraph without text
+        for par in listPar:
+            if par == "":
+                listPar.remove(par)
+
+        pprint.pprint(listPar)
 
 
 if __name__ == "__main__":
