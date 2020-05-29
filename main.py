@@ -91,8 +91,6 @@ class MainWindow(QMainWindow):
 
             i += 1
 
-#        print(listPar)
-
         # Dividing the text into 280 or less characters strings
         listTweets = []
         listDots = []
@@ -122,10 +120,8 @@ class MainWindow(QMainWindow):
                     # Check is the dot is the last one in the list
                     # If true, add it to the list
                     if i == len(listDots)-2:
-                        print("Patata")
                         listTweets.append(par[initChar:listDots[i]+1])
 
-        pprint.pprint(listTweets)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
