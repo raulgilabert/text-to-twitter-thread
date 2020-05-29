@@ -85,19 +85,47 @@ class MainWindow(QMainWindow):
 
                 initChar = i + 1
 
-            i += 1
-
             # Check if end of the text, if true, add the paragraph to the list
             if i == len(text):
                 listPar.append(text[initChar:i])
 
-        # Remove from the list the paragraph without text
+            i += 1
+
+#        print(listPar)
+
+        # Dividing the text into 280 or less characters strings
+        listTweets = []
+        listDots = []
+
         for par in listPar:
-            if par == "":
-                listPar.remove(par)
+            # Remove from the list the paragraph without text
+            if len(par) <= 280:
+                listTweets.append(par)
+            else:
+                # Select the points where are "."
+                listDots = []
+                initChar = 0
 
-        pprint.pprint(listPar)
+                for i in range(0, len(par)):
+                    if par[i] == ".":
+                        listDots.append(i)
 
+                # Pass in the dots list
+                for i in range(0, len(listDots)-1):
+                    # Check if the dot position is more than 280
+                    # If true add it to the tweets list
+                    if listDots[i] - initChar > 280:
+                        listTweets.append(par[initChar:listDots[i-1]+1])
+
+                        initChar = listDots[i-1] + 2
+
+                    # Check is the dot is the last one in the list
+                    # If true, add it to the list
+                    if i == len(listDots)-2:
+                        print("Patata")
+                        listTweets.append(par[initChar:listDots[i]+1])
+
+        pprint.pprint(listTweets)
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
