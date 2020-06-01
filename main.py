@@ -7,7 +7,6 @@ import os
 import tweepy
 import requests
 import json
-import pprint
 
 
 # Return the authentication keys
@@ -233,7 +232,7 @@ class MainWindow(QMainWindow):
                         listDots.append(i)
 
                 # Pass in the dots list
-                for i in range(0, len(listDots)-1):
+                for i in range(0, len(listDots)):
                     # Check if the dot position is more than 280
                     # If true add it to the tweets list
                     if listDots[i] - initChar > 280:
@@ -243,13 +242,8 @@ class MainWindow(QMainWindow):
 
                     # Check is the dot is the last one in the list
                     # If true, add it to the list
-                    if i == len(listDots)-2:
+                    if i == len(listDots)-1:
                         self.listTweets.append(par[initChar:listDots[i]+1])
-
-        # Remove empty tweets from the list
-        for tweet in self.listTweets:
-            if tweet == "":
-                self.listTweets.remove(tweet)
 
         # Check if checkbox is checked, if true, execute add images function
         # If not, convert tweets format and publish them
@@ -269,23 +263,32 @@ class MainWindow(QMainWindow):
         self.tweets = []
 
         for tweet in self.listTweets:
-            # Ask if add add image
-            message = 'Add an image to the tweet: "' + tweet + '"?'
+            # Ignore empty tweets
+            if tweet != "":
+                # Ask if add add image
+                message = 'Add an image to the tweet: "' + tweet + '"?'
 
-            yesNo = QMessageBox.question(self, "Do you want to add an image?",
-                                         message,
-                                         QMessageBox.Yes | QMessageBox.No)
+                yesNo = QMessageBox.question(self,
+                                             "Do you want to add an image?",
+                                             message,
+                                             QMessageBox.Yes | QMessageBox.No)
 
-            # Ask the link of the image
-            if yesNo == QMessageBox.Yes:
-                url, ok = QInputDialog.getText(self, "Image URL",
-                                               "Image URL: ",
-                                               QLineEdit.Normal, "")
+                # Ask the link of the image
+                if yesNo == QMessageBox.Yes:
+                    url, ok = QInputDialog.getText(self, "Image URL",
+                                                   "Image URL: ",
+                                                   QLineEdit.Normal, "")
 
-                self.tweets.append({
-                    "tweet": tweet,
-                    "image": url
-                })
+                    self.tweets.append({
+                        "tweet": tweet,
+                        "image": url
+                    })
+
+                else:
+                    self.tweets.append({
+                        "tweet": tweet,
+                        "image": ""
+                    })
 
         self.publish()
 
@@ -294,29 +297,34 @@ class MainWindow(QMainWindow):
 
         # Pass into the tweets
         for tweet in self.tweets:
-            i += 1
+            # Ignore empty tweets
+            if tweet["tweet"] != "":
+                i += 1
 
-            # Check if the tweet has an image
-            if tweet["image"] == "":
-                # Check if the tweet is a response or the first and send it
-                if i == 1:
-                    status = api.update_status(tweet["tweet"])
+                # Check if the tweet has an image
+                if tweet["image"] == "":
+                    # Check if the tweet is a response or the first and send it
+                    if i == 1:
+                        status = api.update_status(tweet["tweet"])
+                    else:
+                        status = api.update_status(tweet["tweet"],
+                                                   in_reply_to_status_id=ID)
                 else:
-                    status = api.update_status(tweet["tweet"],
-                                               in_reply_to_status_id=status.id)
-            else:
-                # Download the image
-                file = filename(tweet["image"])
+                    # Download the image
+                    file = filename(tweet["image"])
 
-                # Check if the tweet is a response or the first and send it
-                if i == 1:
-                    status = api.update_with_media(file, status=tweet["tweet"])
-                else:
-                    status = api.update_with_media(file,
-                                                   status=tweet["tweet"],
-                                                   in_reply_to_status_id=status.id)
+                    # Check if the tweet is a response or the first and send it
+                    if i == 1:
+                        status = api.update_with_media(file,
+                                                       status=tweet["tweet"])
+                    else:
+                        status = api.update_with_media(file,
+                                                       status=tweet["tweet"],
+                                                       in_reply_to_status_id=ID)
 
-                os.remove(file)
+                    os.remove(file)
+
+                ID = status.id
 
 
 if __name__ == "__main__":
